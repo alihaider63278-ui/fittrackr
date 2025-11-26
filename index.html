@@ -1,21 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>GYMora — Personal Fitness Hub</title>
 
-<!-- Chart.js CDN for progress charts -->
+<!-- Chart.js for progress charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <style>
-  /* Basic reset & variables */
   :root{
-    --bg: #0f1724;            /* dark background base */
+    --bg: #0f1724;
     --card: #0b1220;
     --muted: #94a3b8;
-    --accent: linear-gradient(90deg,#6b5bff,#ff7bac);
     --accent-solid: #7b66ff;
+    --accent-grad: linear-gradient(90deg,#6b5bff,#ff7bac);
     --glass: rgba(255,255,255,0.03);
     --radius: 14px;
     --outline: 2px;
@@ -29,130 +28,71 @@
     --glass: rgba(0,0,0,0.03);
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-    background:var(--bg); color: #e6eef8;-webkit-font-smoothing:antialiased}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:var(--bg);color:#e6eef8}
   body.light{color:#0b1220}
-  /* app shell */
-  .app{
-    display:grid;
-    grid-template-columns: 72px 1fr;
-    min-height:100vh;
-  }
-  /* SIDEBAR */
-  .sidebar{
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
-    padding:18px 10px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:14px;
-    border-right:1px solid rgba(255,255,255,0.03);
-  }
-  .logo{
-    width:48px;height:48px;border-radius:12px;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:18px;
-    background:var(--accent-solid);
-    color:white; box-shadow:0 6px 18px rgba(123,102,255,0.18);
-    transform:translateY(0); transition:all .2s;
-  }
-  .logo:active{transform:translateY(2px) scale(.98)}
-  .navbtn{
-    width:48px;height:48px;border-radius:12px;border:var(--outline) solid rgba(255,255,255,0.03);
-    background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;
-    cursor:pointer; transition:transform .12s, background .18s, color .18s; font-size:14px;
-  }
+
+  /* layout */
+  .app{display:grid;grid-template-columns:72px 1fr;min-height:100vh}
+  @media (max-width:900px){ .app{grid-template-columns:64px 1fr} }
+  @media (max-width:640px){ .app{grid-template-columns:56px 1fr} }
+
+  /* sidebar */
+  .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));padding:18px 10px;display:flex;flex-direction:column;align-items:center;gap:14px;border-right:1px solid rgba(255,255,255,0.03)}
+  .logo{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:var(--accent-solid);color:white;box-shadow:0 6px 18px rgba(123,102,255,0.18);cursor:default}
+  .navbtn{width:48px;height:48px;border-radius:12px;border:var(--outline) solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s, background .18s, color .18s;font-size:16px}
   .navbtn:hover{transform:translateY(-4px); color:white; background:var(--glass)}
   .navbtn.active{background:linear-gradient(180deg, rgba(123,102,255,0.14), rgba(255,124,160,0.06)); color:white}
   .sidebar .spacer{flex:1}
-  /* TOPBAR + CONTENT */
-  .main{
-    padding:14px;
-  }
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;
-  }
-  .search{
-    flex:1;background:var(--card);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
-    display:flex;gap:8px;align-items:center;min-width:0;
-  }
+
+  /* main and topbar */
+  .main{padding:14px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .search{flex:1;background:var(--card);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);display:flex;gap:8px;align-items:center;min-width:0}
   .search input{flex:1;border:0;background:transparent;color:inherit;outline:none}
-  .outline-btn{
-    display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;
-    border:var(--outline) solid var(--accent-solid); background:transparent;color:inherit;cursor:pointer;
-    transition:transform .12s, box-shadow .12s;
-  }
+
+  /* buttons */
+  .outline-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:var(--outline) solid var(--accent-solid);background:transparent;color:inherit;cursor:pointer;transition:transform .12s, box-shadow .12s}
   .outline-btn:active{transform:scale(.98)}
-  .outline-btn .dot{width:10px;height:10px;border-radius:3px;background:linear-gradient(90deg,#6b5bff,#ff7bac)}
-  .card{
-    background:var(--card); border-radius:var(--radius); padding:14px; box-shadow: 0 6px 18px rgba(2,6,23,0.6);
-    margin-bottom:14px; border:1px solid rgba(255,255,255,0.02);
-  }
-  .grid{
-    display:grid;grid-template-columns:repeat(12,1fr);gap:14px;
-  }
-  .col-4{grid-column:span 4}
-  .col-8{grid-column:span 8}
-  .col-6{grid-column:span 6}
-  .col-12{grid-column:span 12}
+  .outline-btn .dot{width:10px;height:10px;border-radius:3px;background:var(--accent-solid)}
+  .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:none;background:var(--accent-solid);color:white;cursor:pointer;box-shadow:0 8px 30px rgba(99,73,255,0.14);transition:transform .12s}
+  .btn-primary:active{transform:translateY(2px) scale(.995)}
+
+  /* cards and grid */
+  .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 6px 18px rgba(2,6,23,0.6);margin-bottom:14px;border:1px solid rgba(255,255,255,0.02)}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .col-4{grid-column:span 4}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-12{grid-column:span 12}
+  @media (max-width:900px){ .grid{grid-template-columns:repeat(6,1fr)} .col-8{grid-column:span 6} .col-4{grid-column:span 6} }
+  @media (max-width:640px){ .grid{grid-template-columns:repeat(4,1fr)} .col-6{grid-column:span 4} .col-4{grid-column:span 4} }
+
   h1,h2{margin:0 0 8px 0}
   p{margin:0;color:var(--muted)}
-  /* small utilities */
-  .muted{color:var(--muted);font-size:13px}
-  .kbd{padding:6px 10px;border-radius:8px;background:rgba(0,0,0,0.08);font-weight:600}
-  /* responsive */
-  @media (max-width:900px){
-    .app{grid-template-columns: 64px 1fr}
-    .grid{grid-template-columns:repeat(6,1fr)}
-    .col-8{grid-column:span 6}
-    .col-4{grid-column:span 6}
-  }
-  @media (max-width:640px){
-    .app{grid-template-columns: 56px 1fr}
-    .grid{grid-template-columns:repeat(4,1fr)}
-    .col-6{grid-column:span 4}
-    .col-4{grid-column:span 4}
-  }
 
-  /* Form styles */
+  /* small */
   label{display:block;margin-top:8px;font-size:13px;color:var(--muted)}
-  input[type="number"], input[type="text"], select, textarea{
-    width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;
-  }
-  .btn-primary{
-    display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:none;background:var(--accent-solid);color:white;
-    cursor:pointer; box-shadow: 0 8px 30px rgba(99,73,255,0.14); transition:transform .12s;
-  }
-  .btn-primary:active{transform:translateY(2px) scale(.995)}
+  input[type="number"], input[type="text"], select, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
   .mini{padding:8px 10px;font-size:13px;border-radius:10px}
   .row{display:flex;gap:8px;flex-wrap:wrap}
   .small{font-size:13px;color:var(--muted)}
 
-  /* toast */
-  .toast{position:fixed;right:18px;bottom:18px;background:var(--card);padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 36px rgba(2,6,23,0.6)}
-  /* outlined animated click effect for .outline-btn already present */
-  /* chart card */
-  .chart-wrap{height:210px}
-  /* ai chat */
-  #chatBox{height:220px;overflow:auto;padding:10px;border-radius:10px;background:rgba(0,0,0,0.03);margin-bottom:8px}
+  /* chat */
+  #chatBox{height:220px;overflow:auto;padding:10px;border-radius:10px;background:rgba(0,0,0,0.03);margin-bottom:8px;display:flex;flex-direction:column}
   .msg{padding:8px 10px;border-radius:10px;margin-bottom:8px;display:inline-block;max-width:86%}
   .msg.user{background:linear-gradient(90deg,#6b5bff22,#ff7bac22);align-self:flex-end}
-  .msg.bot{background:rgba(255,255,255,0.02)}
-  /* tracker table */
+  .msg.bot{background:rgba(255,255,255,0.02);align-self:flex-start}
+
+  /* table */
   table{width:100%;border-collapse:collapse}
   th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
   .muted-2{color:rgba(255,255,255,0.55);font-size:12px}
 
-  /* small animation for icons */
-  .pulse{animation:pulse 1.8s infinite}
-  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+  /* toast */
+  .toast{position:fixed;right:18px;bottom:18px;background:var(--card);padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 36px rgba(2,6,23,0.6);transition:transform .2s,opacity .2s}
 
-  /* nice rounded inputs focus */
   input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 6px 20px rgba(123,102,255,0.06);border-color:rgba(123,102,255,0.4)}
+  .chart-wrap{height:210px}
 </style>
 </head>
 <body>
-
 <div id="app" class="app">
   <!-- SIDEBAR -->
   <aside class="sidebar" aria-label="Main navigation">
@@ -163,14 +103,12 @@
     <button class="navbtn" data-page="bot" title="AI Bot" onclick="navTo(event)">🤖</button>
     <button class="navbtn" data-page="workouts" title="Workouts" onclick="navTo(event)">🏋️</button>
     <button class="navbtn" data-page="timer" title="Timer" onclick="navTo(event)">⏱️</button>
+
     <div class="spacer"></div>
     <button class="navbtn" id="themeToggle" title="Toggle theme" onclick="toggleTheme()">🌙</button>
     <button class="navbtn" title="Export" onclick="exportData()">⬇️</button>
     <button class="navbtn" title="Import" onclick="importData()">⬆️</button>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main" role="main">
+ <main class="main" role="main">
     <div class="topbar">
       <div class="search card" style="max-width:760px">
         <svg width="18" height="18" viewBox="0 0 24 24" style="opacity:.7"><path fill="currentColor" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"></path></svg>
@@ -251,7 +189,6 @@
             <div style="margin-top:8px" class="small muted">Tip updates every day</div>
           </div>
         </div>
-
       </div>
     </section>
 
@@ -297,8 +234,7 @@
         </div>
       </div>
     </section>
-
-    <section id="bot" class="page" style="display:none;">
+ <section id="bot" class="page" style="display:none;">
       <div class="card" style="display:flex;flex-direction:column">
         <h2>GYMora AI Bot</h2>
         <div id="chatBox"></div>
@@ -306,7 +242,7 @@
           <input id="botInput" placeholder="Ask about workout, diet, supplements..." onkeydown="if(event.key==='Enter'){botSend()}">
           <button class="outline-btn" onclick="botSend()">Send</button>
         </div>
-        <div class="small muted" style="margin-top:8px">AI is local rule-based assistant for now — detailed custom plans available soon.</div>
+        <div class="small muted" style="margin-top:8px">AI is local rule-based assistant for now — I can integrate a cloud LLM later if you want.</div>
       </div>
     </section>
 
@@ -380,7 +316,7 @@ const storage = {
     try{ const v = localStorage.getItem(key); return v?JSON.parse(v):fallback }catch(e){return fallback}
   },
   set(key,val){ localStorage.setItem(key,JSON.stringify(val)) }
-}
+};
 
 /* initial user/profile */
 let profile = storage.get('gymora_profile', {
@@ -408,18 +344,19 @@ function updateThemeButton(){
 /* pages nav */
 function navTo(e){
   const btn = (e.target.closest) ? e.target.closest('button') : e.target;
+  if(!btn || !btn.dataset) return;
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   const page = btn.dataset.page;
   document.querySelectorAll('.page').forEach(p=>p.style.display='none');
-  document.getElementById(page).style.display='block';
+  const el = document.getElementById(page);
+  if(el) el.style.display='block';
 }
 
 /* quick search */
 function quickSearch(){
   const q = document.getElementById('quickSearch').value.toLowerCase();
   if(!q) return toast('Type something to search');
-  // simple routing: if includes "bot" go to bot, "calc" to calc etc
   if(q.includes('bot') || q.includes('ai')){ document.querySelector('[data-page="bot"]').click(); return }
   if(q.includes('bmi')||q.includes('calorie')||q.includes('macro')){ document.querySelector('[data-page="calc"]').click(); return }
   if(q.includes('timer')||q.includes('hiit')||q.includes('stopwatch')){ document.querySelector('[data-page="timer"]').click(); return }
@@ -434,9 +371,8 @@ function toast(txt, ms=2200){
   d.innerText=txt;
   root.appendChild(d);
   setTimeout(()=>{ d.style.opacity=0; d.style.transform='translateY(10px)'; }, ms-300);
-  setTimeout(()=>root.removeChild(d), ms);
+  setTimeout(()=>{ try{ root.removeChild(d) }catch(e){} }, ms);
 }
-
 /* ---------------------------
    Calculators: BMI, BMR, Macros
    --------------------------- */
@@ -458,9 +394,294 @@ function calculateAll(){
      <p class="small">BMR: <strong>${Math.round(bmr)}</strong> kcal/day</p>
      <p class="small">Maintenance: <strong>${maintenance}</strong> kcal/day</p>`;
 
-  // update stats on dashboard
   document.getElementById('statBMI').innerText = `BMI: ${bmi}`;
   document.getElementById('statCalories').innerText = `Calories: ${maintenance}`;
-  // update macros defaults
+
   profile.height=h; profile.weight=w; profile.age=age; profile.activity=activity; profile.gender=gender;
-  storage.set('gymora_prof
+  storage.set('gymora_profile', profile);
+  toast('Profile calculated');
+}
+
+function bmiInterpret(bmi){
+  bmi = Number(bmi);
+  if(bmi<18.5) return 'Underweight';
+  if(bmi<25) return 'Normal';
+  if(bmi<30) return 'Overweight';
+  return 'Obese';
+}
+
+function calcMacros(){
+  const proteinPct = Number(document.getElementById('macroProtein').value)||30;
+  const fatPct = Number(document.getElementById('macroFat').value)||25;
+  const carbPct = Number(document.getElementById('macroCarb').value)||45;
+
+  const maintenance = (() => {
+    const w = (profile.weight||70), h=(profile.height||170), age=(profile.age||25);
+    let bmr = profile.gender === 'male' ? 10*w + 6.25*h - 5*age + 5 : 10*w + 6.25*h - 5*age - 161;
+    return Math.round(bmr * (profile.activity || 1.55));
+  })();
+
+  const protCals = maintenance*(proteinPct/100), fatCals = maintenance*(fatPct/100), carbCals = maintenance*(carbPct/100);
+  const protGr = Math.round(protCals/4), fatGr = Math.round(fatCals/9), carbGr = Math.round(carbCals/4);
+  document.getElementById('macroResult').innerHTML =
+    `<p class="small">Calories: <strong>${maintenance}</strong></p>
+     <p class="small">Protein: <strong>${protGr} g</strong> (${proteinPct}%)</p>
+     <p class="small">Fat: <strong>${fatGr} g</strong> (${fatPct}%)</p>
+     <p class="small">Carbs: <strong>${carbGr} g</strong> (${carbPct}%)</p>`;
+  toast('Macros calculated');
+}
+
+/* protein sources listing */
+const proteinSourcesArr = [
+  {name:'Chicken breast (100g)',protein:31},
+  {name:'Egg (1 large)',protein:6},
+  {name:'Greek Yogurt (100g)',protein:10},
+  {name:'Lentils (100g cooked)',protein:9},
+  {name:'Whey (1 scoop)',protein:24},
+  {name:'Milk (250ml)',protein:8},
+];
+function renderProteinSources(){
+  const node = document.getElementById('proteinSources');
+  node.innerHTML='';
+  proteinSourcesArr.forEach(p=>{
+    const el = document.createElement('div');
+    el.className='card';
+    el.style.minWidth='140px';
+    el.innerHTML = `<strong>${p.name}</strong><div class="small muted-2">${p.protein} g protein</div>`;
+    node.appendChild(el);
+  });
+  const pl = document.getElementById('proteinList');
+  if(pl) pl.innerHTML = proteinSourcesArr.slice(0,4).map(p=>`<li>${p.name} — ${p.protein}g</li>`).join('');
+}
+renderProteinSources();
+
+/* ---------------------------
+   Workout generator & logging
+   --------------------------- */
+const presets = {
+  beginner:[
+    {name:'Squats',sets:3,reps:10},
+    {name:'Push-ups',sets:3,reps:10},
+    {name:'Bent-over Row',sets:3,reps:8},
+    {name:'Plank',sets:3,reps:30},
+  ],
+  intermediate:[
+    {name:'Deadlift',sets:4,reps:6},
+    {name:'Bench Press',sets:4,reps:8},
+    {name:'Pull-ups',sets:4,reps:6},
+    {name:'Leg Press',sets:4,reps:10},
+  ],
+  advanced:[
+    {name:'Squat (heavy)',sets:5,reps:5},
+    {name:'Clean & Jerk',sets:5,reps:3},
+    {name:'Weighted Pull-ups',sets:5,reps:5},
+    {name:'Romanian Deadlift',sets:4,reps:6},
+  ],
+};
+function generatePreset(){
+  const p = document.getElementById('preset').value;
+  const list = presets[p];
+  const view = document.getElementById('presetView');
+  view.innerHTML = `<strong>${p.charAt(0).toUpperCase()+p.slice(1)} Program</strong><ol style="margin-top:8px">${list.map(i=>`<li>${i.name} — ${i.sets}×${i.reps}</li>`).join('')}</ol>`;
+}
+generatePreset();
+
+function loadLogs(){
+  const logs = storage.get('gymora_logs', []);
+  const tbody = document.querySelector('#logTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  logs.slice().reverse().forEach(l=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${l.date}</td><td>${l.workout}</td><td>${l.note||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+loadLogs();
+
+function addLog(){
+  const note = document.getElementById('logNote').value || '';
+  const logs = storage.get('gymora_logs', []);
+  logs.push({date:new Date().toLocaleString(), workout:'Manual', note});
+  storage.set('gymora_logs', logs);
+  document.getElementById('logNote').value='';
+  loadLogs(); toast('Log added');
+}
+
+/* ---------------------------
+   Weight & Chart
+   --------------------------- */
+let weightData = storage.get('gymora_weights', []);
+function addWeight(){
+  const w = Number(document.getElementById('logWeight').value);
+  if(!w){ toast('Enter a valid weight'); return; }
+  weightData.push({d:new Date().toLocaleDateString(), w});
+  storage.set('gymora_weights', weightData);
+  document.getElementById('logWeight').value='';
+  renderWeightChart();
+  toast('Weight logged');
+}
+function renderWeightChart(){
+  const ctx = document.getElementById('weightChart');
+  const labels = weightData.map(x=>x.d);
+  const data = weightData.map(x=>x.w);
+  if(window.weightChart) window.weightChart.destroy();
+  window.weightChart = new Chart(ctx, {
+    type:'line',
+    data:{labels, datasets:[{label:'Weight (kg)', data, tension:0.35, borderWidth:2, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-solid') || '#6b5bff', pointRadius:4}]},
+    options:{responsive:true, plugins:{legend:{display:false}}}
+  });
+}
+renderWeightChart();
+
+/* ---------------------------
+   Stopwatch & HIIT (again for timer page)
+   --------------------------- */
+let swInterval = null, swT = 0;
+function swStart(){ if(swInterval) return; swInterval = setInterval(()=>{ swT++; updateSW() }, 1000); toast('Stopwatch started') }
+function swStop(){ clearInterval(swInterval); swInterval=null; toast('Stopped') }
+function swReset(){ swStop(); swT=0; updateSW(); toast('Reset') }
+function updateSW(){ const h=Math.floor(swT/3600), m=Math.floor((swT%3600)/60), s=swT%60; const time = `${pad(h)}:${pad(m)}:${pad(s)}`; document.getElementById('sw').innerText = time; document.getElementById('stopwatchDisplay') && (document.getElementById('stopwatchDisplay').innerText = time) }
+function pad(n){ return n<10 ? '0'+n : '' }
+
+let hiitTimer=null, hiitState={round:0,phase:'stopped',secsLeft:0};
+function startHIIT(){
+  const rounds=Number(document.getElementById('hiitRounds').value)||6;
+  const work=Number(document.getElementById('hiitWork').value)||30;
+  const rest=Number(document.getElementById('hiitRest').value)||15;
+  hiitState.round=1; hiitState.phase='work'; hiitState.secsLeft=work;
+  document.getElementById('hiitDisplay').innerText = `Round 1/${rounds} — Work ${hiitState.secsLeft}s`;
+  hiitTimer = setInterval(()=>{
+    hiitState.secsLeft--;
+    if(hiitState.secsLeft<=0){
+      if(hiitState.phase==='work'){ hiitState.phase='rest'; hiitState.secsLeft=rest; }
+      else { hiitState.round++; if(hiitState.round>rounds){ stopHIIT(); toast('HIIT complete'); return } hiitState.phase='work'; hiitState.secsLeft=work; }
+    }
+    document.getElementById('hiitDisplay').innerText = `Round ${hiitState.round}/${rounds} — ${hiitState.phase.toUpperCase()} ${hiitState.secsLeft}s`;
+  },1000);
+  toast('HIIT started');
+}
+function stopHIIT(){ clearInterval(hiitTimer); hiitTimer=null; hiitState={round:0,phase:'stopped',secsLeft:0}; document.getElementById('hiitDisplay').innerText='Stopped' }
+
+/* ---------------------------
+   AI Bot (local KB)
+   --------------------------- */
+const botKB = [
+  {intent:['diet','meal','calorie','kcal'],reply:(q)=>`For a balanced day: Breakfast — eggs/oats; Lunch — chicken/veg/rice; Snacks — fruits, nuts; Dinner — lean protein + veg. Need a full custom meal plan?`},
+  {intent:['protein','supplement','whey','amino'],reply:(q)=>`Good protein sources: chicken, eggs, whey, yogurt, lentils. Aim ~1.6-2.2g/kg protein if you're building muscle.`},
+  {intent:['lose weight','fat loss','cut'],reply:(q)=>`To lose fat: aim for a 300-500 kcal deficit, keep protein high, maintain resistance training and add 20-30 mins cardio 3-5x/week.`},
+  {intent:['gain muscle','bulk','mass'],reply:(q)=>`To gain mass: small calorie surplus (200-400 kcal), progressive overload in training, protein ~1.6-2.2g/kg, sleep & recovery.`},
+  {intent:['exercise','workout','routine'],reply:(q)=>`Try this: 3x/week full-body: squats, press, row, deadlift/hinge, core. Or split routines 4-5x/week for advanced users.`},
+  {intent:['beginner','start gym','new'],reply:(q)=>`Start with 8-12 weeks of basic strength training: 3 full-body sessions per week focusing on form. Keep workouts short and consistent.`},
+  {intent:['timer','stopwatch','hiit'],reply:(q)=>`Use the built-in stopwatch and HIIT timer — set work/rest intervals and rounds. I can suggest intervals if you tell me goal.`},
+  {intent:['default'],reply:(q)=>`I can help with meals, workouts, timers, and protein. Try: "How many calories should I eat?" or "Give me a beginner chest workout."`}
+];
+
+function botSend(){
+  const q = document.getElementById('botInput').value.trim();
+  if(!q) return;
+  const box = document.getElementById('chatBox');
+  const userEl = document.createElement('div'); userEl.className='msg user'; userEl.innerText=q; box.appendChild(userEl);
+  document.getElementById('botInput').value='';
+  const lc = q.toLowerCase();
+  let best=null, bestScore=0;
+  botKB.forEach(k=>{
+    let score=0; k.intent.forEach(term=>{ if(lc.includes(term)) score++; });
+    if(score>bestScore){ best=k; bestScore=score; }
+  });
+  let reply = best ? best.reply(q) : botKB.find(k=>k.intent.includes('default')).reply(q);
+  if(/\bcalor/i.test(lc) && !/\b(weight|kg|lose|gain|maintain)/i.test(lc)){
+    const est = estimateCalories(profile);
+    reply += `\nEstimated maintenance: ~${est} kcal/day based on your profile.`;
+  }
+  if(lc.includes('how many calories') || lc.includes('calories should i')){
+    reply = `Estimated maintenance calories: ~${estimateCalories(profile)} kcal/day. For fat loss subtract 300-500 kcal, for gain add 200-400 kcal.`;
+  }
+  if(lc.includes('beginner') && lc.includes('workout')){
+    reply = 'Beginner full-body: Squats 3x8, Push-ups 3x8, Dumbbell Row 3x8, Plank 3x30s. Increase reps weekly.';
+  }
+  const botEl = document.createElement('div'); botEl.className='msg bot'; botEl.innerText=reply;
+  box.appendChild(botEl); box.scrollTop = box.scrollHeight;
+}
+
+function estimateCalories(p){
+  const w = p.weight||70, h=p.height||170, age=p.age||25;
+  let bmr = p.gender==='male' ? 10*w + 6.25*h - 5*age + 5 : 10*w + 6.25*h - 5*age - 161;
+  return Math.round(bmr * (p.activity || 1.55));
+}
+
+/* ---------------------------
+   Home auto-fill & init
+   --------------------------- */
+function generateDailyPlan(){
+  const cals = estimateCalories(profile);
+  const proteinAmt = Math.round((profile.weight||70)*1.8);
+  document.getElementById('todayDiet').innerHTML =
+    `<strong>Calories goal:</strong> ${cals} kcal<br>
+     <strong>Breakfast:</strong> 2 eggs, oats, banana<br>
+     <strong>Lunch:</strong> Chicken + rice + veg<br>
+     <strong>Snack:</strong> Greek yogurt + nuts<br>
+     <strong>Dinner:</strong> Fish/Paneer + salad<br>
+     <div style="margin-top:8px" class="small muted">Protein target: <strong>${proteinAmt} g</strong></div>`;
+  const wk = presets['beginner'];
+  document.getElementById('todayWorkout').innerHTML = wk.map(i=>`<div style="margin-bottom:6px"><strong>${i.name}</strong> — ${i.sets}×${i.reps}</div>`).join('');
+  document.getElementById('statProtein').innerText = `Protein: ${proteinAmt} g`;
+  document.getElementById('statCalories').innerText = `Calories: ${cals}`;
+}
+generateDailyPlan();
+
+/* ---------------------------
+   Export / Import backup
+   --------------------------- */
+function exportData(){
+  const data = {
+    profile: storage.get('gymora_profile', {}),
+    logs: storage.get('gymora_logs', []),
+    weights: storage.get('gymora_weights', [])
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='gymora-backup.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported data');
+}
+function importData(){
+  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+  input.onchange = (ev)=>{
+    const f = ev.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      try{
+        const obj = JSON.parse(e.target.result);
+        if(obj.profile) storage.set('gymora_profile', obj.profile);
+        if(obj.logs) storage.set('gymora_logs', obj.logs);
+        if(obj.weights) storage.set('gymora_weights', obj.weights);
+        toast('Imported data');
+        location.reload();
+      }catch(err){ toast('Invalid file') }
+    };
+    reader.readAsText(f);
+  };
+  input.click();
+}
+
+/* ---------------------------
+   UI init & bindings
+   --------------------------- */
+(function initUI(){
+  document.getElementById('height').value = profile.height;
+  document.getElementById('weight').value = profile.weight;
+  document.getElementById('age').value = profile.age;
+  document.getElementById('gender').value = profile.gender;
+  document.getElementById('activity').value = profile.activity;
+  loadLogs();
+  renderWeightChart();
+  document.getElementById('aiTip').innerText = 'Consistency beats perfection. Train regularly & sleep well.';
+})();
+
+document.querySelectorAll('.navbtn').forEach(b=>{
+  b.addEventListener('click', (e)=>navTo(e));
+});
+</script>
+</body>
+</html>

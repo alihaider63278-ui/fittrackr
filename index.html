@@ -5,416 +5,379 @@
 <link rel="apple-touch-icon" href="file_00000000c29c7206a2a5570d93943cc1.png">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>FitTrackr — Single File PWA</title>
+  <title>FitTrackr — Workout Tracker</title>
+
+  <meta name="theme-color" content="#0b1724">
+  <link rel="icon" type="image/png" href="file_00000000c29c7206a2a5570d93943cc1.png">
+
   <style>
+    /* Minimal modern mobile-friendly styles (tailored) */
     :root{
-      --bg:#0f1724; --card:#0b1220; --muted:#95a3b8; --accent1:#00d4ff; --accent2:#7b61ff;
-      --glass: rgba(255,255,255,0.04);
-      --radius:16px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      --bg:#071024; --card:#0b1220; --muted:#95a3b8; --accent:#00d4ff;
+      --radius:14px; --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", Arial;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071024);color:#e6eef8}
-    .app{max-width:920px;margin:18px auto;padding:18px}
-
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
-    .logo{display:flex;align-items:center;gap:12px}
-    .logo .mark{width:48px;height:48px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent1),var(--accent2));box-shadow:0 6px 18px rgba(123,97,255,0.18)}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071024 0%, #071a2f 100%);color:#e6eef8}
+    .wrap{max-width:920px;margin:16px auto;padding:16px}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .logo{width:54px;height:54px;background:var(--accent);border-radius:12px;display:grid;place-items:center;color:#071024;font-weight:700;font-size:20px}
     h1{font-size:18px;margin:0}
-    p.lead{margin:0;color:var(--muted);font-size:13px}
+    p.lead{color:var(--muted);margin:0;font-size:13px}
 
+    /* grid */
     main{display:grid;grid-template-columns:1fr;gap:14px}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 6px 20px rgba(2,6,23,0.6);min-width:0}
+    .card{background:linear-gradient(180deg,var(--card), rgba(11,18,36,0.8));border-radius:var(--radius);padding:12px;box-shadow:0 6px 18px rgba(2,8,20,0.5);border:1px solid rgba(255,255,255,0.02)}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+    input[type=text], select, input[type=number]{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;font-size:14px}
+    .row{display:flex;gap:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent),#7dfcff);color:#071024;font-weight:600;cursor:pointer;box-shadow:0 6px 12px rgba(0,0,0,0.25);transform:translateY(0);transition:transform .12s,box-shadow .12s}
+    .btn:active{transform:translateY(2px)}
+    .btn.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);box-shadow:none}
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+    .exercise{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:12px;background:var(--glass);border:1px solid rgba(255,255,255,0.02)}
+    .ex-meta{display:flex;gap:10px;align-items:center}
+    .ex-name{font-weight:700}
+    .ex-sub{font-size:12px;color:var(--muted)}
+    .small{font-size:12px;color:var(--muted)}
+    .stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .stat{background:var(--glass-2);padding:8px;border-radius:8px;font-size:13px}
 
-    /* top dashboard */
-    .dashboard{display:grid;grid-template-columns:1fr 160px;gap:12px;align-items:center}
-    .stats{display:flex;gap:12px}
-    .stat{background:var(--glass);padding:12px;border-radius:12px;min-width:100px;text-align:center}
-    .stat h3{margin:0;font-size:16px}
-    .stat p{margin:4px 0 0;color:var(--muted);font-size:12px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .muted{color:var(--muted)}
 
-    /* buttons outline + animation */
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.06);background:transparent;color:inherit;cursor:pointer;user-select:none;transition:transform .14s ease, box-shadow .14s ease}
-    .btn:active{transform:translateY(2px) scale(.998)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#021022;border:0;box-shadow:0 8px 30px rgba(123,97,255,0.18)}
-    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.07)}
-    .btn.outline{background:transparent;border:1.5px solid rgba(255,255,255,0.12);padding:12px 16px}
+    /* tracker modal */
+    .overlay{position:fixed;inset:0;background:rgba(2,6,12,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:80}
+    .modal{width:100%;max-width:420px;background:linear-gradient(180deg,#0e1726,#081426);padding:14px;border-radius:12px;box-shadow:0 20px 50px rgba(2,6,20,0.6);border:1px solid rgba(255,255,255,0.03)}
+    .big{font-size:28px;font-weight:700}
+    .timer{font-size:36px;font-weight:800;text-align:center;margin:8px 0}
+    .rep-controls{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px}
 
-    /* animated ripple on click */
-    .btn{position:relative;overflow:hidden}
-    .btn .rip{position:absolute;border-radius:50%;transform:scale(0);opacity:.6;pointer-events:none}
-
-    /* mobile friendly forms */
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input,select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-
-    /* sections grid */
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .ex-list{max-height:260px;overflow:auto}
-    .ex-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:10px;margin-bottom:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
-
-    /* charts */
-    canvas{width:100%;height:140px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
-
-    footer{margin-top:12px;color:var(--muted);font-size:12px;text-align:center}
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px;padding-bottom:40px}
 
     /* responsive */
-    @media(max-width:720px){.dashboard{grid-template-columns:1fr;}.two{grid-template-columns:1fr}.stat{min-width:84px}.logo h1{font-size:16px}}
+    @media(min-width:720px){
+      main{grid-template-columns:1fr 360px}
+    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="wrap">
     <header>
-      <div class="logo">
-        <div class="mark">🏋️</div>
-        <div>
-          <h1>FitTrackr (single file)</h1>
-          <p class="lead">Profile • Workouts • Steps • Planner • Progress</p>
-        </div>
-      </div>
+      <div class="logo">FT</div>
       <div>
-        <button class="btn outline" id="btn-sync">Backup</button>
-        <button class="btn primary" id="btn-add">+ Add Exercise</button>
+        <h1>FitTrackr — Workout Tracker</h1>
+        <p class="lead">Add exercises, track reps & sets, save daily workouts.</p>
       </div>
     </header>
 
     <main>
-      <section class="card dashboard">
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <div>
-              <h3 id="greet">Welcome</h3>
-              <p class="lead" id="subg">Set up your profile to get personalized goals</p>
-            </div>
-            <div style="text-align:right">
-              <p style="margin:0;font-size:12px;color:var(--muted)">Streak</p>
-              <h3 id="streak">0 🔥</h3>
-            </div>
-          </div>
-
-          <div class="stats">
-            <div class="stat">
-              <h3 id="today-steps">0</h3>
-              <p>Steps</p>
-            </div>
-            <div class="stat">
-              <h3 id="today-cals">0</h3>
-              <p>Calories</p>
-            </div>
-            <div class="stat">
-              <h3 id="today-workouts">0</h3>
-              <p>Workouts</p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-            <button class="btn ghost" id="btn-step-manual">+ Step</button>
-            <button class="btn outline" id="btn-perm">Enable Motion</button>
-            <button class="btn" id="btn-profile">Profile</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="two">
+      <!-- left: add & list -->
+      <section>
         <div class="card">
-          <h3 style="margin-top:0">Workout Categories</h3>
-          <div class="ex-list" id="ex-list"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <label for="ex-name">Exercise name</label>
+              <input id="ex-name" type="text" placeholder="Push Ups, Squats, Plank..." />
+            </div>
+            <div style="width:110px">
+              <label for="ex-group">Muscle</label>
+              <select id="ex-group">
+                <option value="Full Body">Full Body</option>
+                <option value="Chest">Chest</option>
+                <option value="Legs">Legs</option>
+                <option value="Arms">Arms</option>
+                <option value="Core">Core</option>
+                <option value="Cardio">Cardio</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <div style="width:120px">
+              <label for="ex-reps">Reps</label>
+              <input id="ex-reps" type="number" min="1" value="10" />
+            </div>
+            <div style="width:120px">
+              <label for="ex-sets">Sets</label>
+              <input id="ex-sets" type="number" min="1" value="3" />
+            </div>
+
+            <div style="flex:1;display:flex;align-items:flex-end;justify-content:flex-end">
+              <button id="add-ex" class="btn">Add Exercise</button>
+            </div>
+          </div>
+
+          <div class="list" id="ex-list" style="margin-top:12px">
+            <!-- exercises inserted here -->
+          </div>
         </div>
 
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h3 style="margin:0">Today</h3>
+              <div class="muted small">Saved workouts for today</div>
+            </div>
+            <div id="today-count" class="small muted">0 items</div>
+          </div>
+
+          <div id="today-list" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <!-- right: stats and quick actions -->
+      <aside>
         <div class="card">
-          <h3 style="margin-top:0">Today • Planner</h3>
-          <div id="planner-area"></div>
-          <canvas id="chart-steps"></canvas>
-        </div>
-      </section>
+          <h3 style="margin:0">Quick Actions</h3>
+          <div class="stat-row" style="margin-top:10px">
+            <div class="stat">Exercises: <span id="stat-ex">0</span></div>
+            <div class="stat">Workouts today: <span id="stat-wk">0</span></div>
+          </div>
 
-      <section class="row">
-        <div class="card" style="flex:1">
-          <h3 style="margin-top:0">Quick Actions</h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn outline" id="start-workout">Start Workout</button>
-            <button class="btn outline" id="log-weight">Log Weight</button>
-            <button class="btn outline" id="water">Add Water</button>
-            <button class="btn outline" id="view-progress">View Progress</button>
+          <div style="margin-top:12px">
+            <button id="clear-all" class="btn ghost" style="width:100%">Clear local data</button>
           </div>
         </div>
 
-        <div class="card" style="width:260px">
-          <h3 style="margin-top:0">Profile Snapshot</h3>
-          <div id="profile-snap"></div>
+        <div class="card" style="margin-top:12px">
+          <h3 style="margin:0">How to use</h3>
+          <p class="muted small" style="margin-top:6px">
+            Add exercise → Press "Do" to start a set → Use + / − to count reps → Finish set → Mark complete.
+          </p>
         </div>
-      </section>
-
-      <section class="card">
-        <h3 style="margin-top:0">Exercise Details / Add</h3>
-        <form id="form-ex">
-          <div style="display:grid;grid-template-columns:1fr 120px;gap:8px;align-items:end">
-            <div>
-              <label>Exercise name</label>
-              <input id="ex-name" placeholder="Push ups">
-            </div>
-            <div>
-              <label>Category</label>
-              <select id="ex-cat"><option>Chest</option><option>Back</option><option>Legs</option><option>Arms</option><option>Abs</option><option>Full Body</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="ex-reps" placeholder="Reps / Time" />
-            <input id="ex-sets" placeholder="Sets" />
-            <button class="btn primary" id="save-ex">Save</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="card">
-        <h3 style="margin-top:0">History & Progress</h3>
-        <canvas id="chart-progress" style="height:120px"></canvas>
-      </section>
-
+      </aside>
     </main>
 
-    <footer class="card">Built in one file • Save as .html and open in mobile browser • Supports manual step logging and motion-based step detection where available.</footer>
+    <footer class="muted">Local-first: your data is stored on this device only.</footer>
+  </div>
+
+  <!-- modal / overlay for doing exercise -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="modal-name" class="big">Push Ups</div>
+          <div id="modal-sub" class="muted small">Chest • 3 sets • 10 reps</div>
+        </div>
+        <div><button id="close-modal" class="btn ghost">Close</button></div>
+      </div>
+
+      <div class="timer center" id="modal-set">Set 1 / 3</div>
+      <div class="rep-controls">
+        <button id="dec-rep" class="btn ghost">−</button>
+        <div style="min-width:60px;text-align:center">
+          <div class="small muted">Reps</div>
+          <div id="rep-count" style="font-size:22px;font-weight:700">0</div>
+        </div>
+        <button id="inc-rep" class="btn">+</button>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px;justify-content:center">
+        <button id="finish-set" class="btn">Finish Set</button>
+        <button id="skip-set" class="btn ghost">Skip Set</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    // --- Utilities ---
-    const $ = sel => document.querySelector(sel)
-    const $$ = sel => Array.from(document.querySelectorAll(sel))
-    function ripple(e){
-      const b = e.currentTarget
-      const r = document.createElement('span')
-      r.className='rip'
-      const d = Math.max(b.offsetWidth,b.offsetHeight)
-      r.style.width=r.style.height = d+'px'
-      const rect=b.getBoundingClientRect()
-      r.style.left = (e.clientX-rect.left - d/2)+'px'
-      r.style.top = (e.clientY-rect.top - d/2)+'px'
-      r.style.background = 'rgba(255,255,255,0.06)'
-      b.appendChild(r)
-      requestAnimationFrame(()=>{r.style.transform='scale(1)';r.style.opacity='0'})
-      setTimeout(()=>r.remove(),500)
-    }
-    $$('.btn').forEach(b=>b.addEventListener('click',ripple))
+    /* App logic: localStorage based simple workout tracker */
+    const LS_KEY_EX = "fit_exercises_v1";
+    const LS_KEY_LOG = "fit_logs_v1";
 
-    // --- Local data ---
-    const STORAGE_KEY='fittrackr_v1'
-    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-    state.exercises = state.exercises || []
-    state.profile = state.profile || {name:'',age:'',height:'',weight:'',gender:'',goal:'maintenance'}
-    state.stepsLog = state.stepsLog || {today:0,history:[]} // history: [{date,steps}]
-    state.weights = state.weights || []
-    state.water = state.water || {today:0}
-    state.planner = state.planner || {today:[]}
+    // DOM
+    const exName = document.getElementById("ex-name");
+    const exGroup = document.getElementById("ex-group");
+    const exReps = document.getElementById("ex-reps");
+    const exSets = document.getElementById("ex-sets");
+    const addBtn = document.getElementById("add-ex");
+    const exList = document.getElementById("ex-list");
+    const todayCount = document.getElementById("today-count");
+    const todayList = document.getElementById("today-list");
+    const statEx = document.getElementById("stat-ex");
+    const statWk = document.getElementById("stat-wk");
+    const clearAll = document.getElementById("clear-all");
 
-    function saveState(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)) }
+    // modal
+    const overlay = document.getElementById("overlay");
+    const modalName = document.getElementById("modal-name");
+    const modalSub = document.getElementById("modal-sub");
+    const modalSet = document.getElementById("modal-set");
+    const repCount = document.getElementById("rep-count");
+    const incRep = document.getElementById("inc-rep");
+    const decRep = document.getElementById("dec-rep");
+    const finishSet = document.getElementById("finish-set");
+    const skipSet = document.getElementById("skip-set");
+    const closeModal = document.getElementById("close-modal");
 
-    // --- UI binders ---
-    function renderExercises(){
-      const list = $('#ex-list')
-      list.innerHTML=''
-      if(!state.exercises.length) list.innerHTML='<div style="color:var(--muted)">No exercises yet. Add one above.</div>'
-      state.exercises.forEach((ex,idx)=>{
-        const el = document.createElement('div');el.className='ex-item'
-        el.innerHTML = `<div><strong>${ex.name}</strong><div style="font-size:12px;color:var(--muted)">${ex.cat} • ${ex.reps} • ${ex.sets} sets</div></div><div style="display:flex;gap:8px"><button class='btn ghost btn-do' data-i='${idx}'>Do</button><button class='btn outline btn-del' data-i='${idx}'>Del</button></div>`
-        list.appendChild(el)
-      })
-      $$('.btn-del').forEach(b=>b.onclick = e => { state.exercises.splice(+e.target.dataset.i,1); saveState(); renderExercises(); renderStats() })
-      $$('.btn-do').forEach(b=>b.onclick = e => { const ex = state.exercises[+e.target.dataset.i]; startQuick(ex) })
-    }
+    // state
+    let exercises = [];
+    let logs = []; // saved completed sets
+    let active = null; // {id, setIndex, targetSets, targetReps, name, group}
+    loadFromStorage();
 
-    function renderPlanner(){
-      const area = $('#planner-area')
-      area.innerHTML=''
-      if(!state.planner.today.length) area.innerHTML='<div style="color:var(--muted)">No exercises planned for today.</div>'
-      state.planner.today.forEach((p,i)=>{
-        const d = document.createElement('div');d.style.display='flex';d.style.justifyContent='space-between';d.style.alignItems='center';d.style.marginBottom='8px'
-        d.innerHTML = `<div>${p.name} <div style="font-size:12px;color:var(--muted)">${p.reps} • ${p.sets} sets</div></div><div><button class='btn outline run-pl' data-i='${i}'>Run</button></div>`
-        area.appendChild(d)
-      })
-      $$('.run-pl').forEach(b=>b.onclick = e => startQuick(state.planner.today[+e.target.dataset.i]))
+    // helpers
+    function uid(){ return 'id_'+Math.random().toString(36).slice(2,9) }
+    function todayKey(){ let d=new Date(); return d.toISOString().slice(0,10) }
+    function saveExercises(){ localStorage.setItem(LS_KEY_EX, JSON.stringify(exercises)) }
+    function saveLogs(){ localStorage.setItem(LS_KEY_LOG, JSON.stringify(logs)) }
+
+    function loadFromStorage(){
+      try{
+        exercises = JSON.parse(localStorage.getItem(LS_KEY_EX)) || [];
+        logs = JSON.parse(localStorage.getItem(LS_KEY_LOG)) || [];
+      }catch(e){ exercises=[]; logs=[] }
+      renderList();
+      renderStats();
+      renderToday();
     }
 
-    function renderProfile(){
-      const snap = $('#profile-snap')
-      const p = state.profile
-      snap.innerHTML = `<div style="font-size:14px"><strong>${p.name || '—'}</strong></div><div style='color:var(--muted);font-size:13px'>Age: ${p.age||'—'} • ${p.gender||'—'}</div><div style='color:var(--muted);font-size:13px'>Height: ${p.height||'—'} cm • Weight: ${p.weight||'—'} kg</div>`
-      $('#greet').innerText = p.name?`Hi, ${p.name}`:'Welcome'
-      $('#subg').innerText = p.name?`Goal: ${p.goal || 'maintenance'}`:'Set up your profile to get personalized goals'
+    // render exercise list
+    function renderList(){
+      exList.innerHTML = "";
+      exercises.forEach(ex=>{
+        const el = document.createElement("div");
+        el.className = "exercise";
+        el.innerHTML = `
+          <div class="ex-meta">
+            <div>
+              <div class="ex-name">${escape(ex.name)}</div>
+              <div class="ex-sub">${ex.group} • ${ex.sets} sets • ${ex.reps} reps</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn ghost btn-edit" data-id="${ex.id}">Edit</button>
+            <button class="btn ghost btn-del" data-id="${ex.id}">Del</button>
+            <button class="btn btn-do" data-id="${ex.id}">Do</button>
+          </div>
+        `;
+        exList.appendChild(el);
+      });
+      statEx.textContent = exercises.length;
     }
 
-    function renderStats(){
-      $('#today-steps').innerText = state.stepsLog.today || 0
-      $('#today-cals').innerText = estimateCalories(state.stepsLog.today)
-      $('#today-workouts').innerText = state.planner.today.length || 0
-      $('#streak').innerText = (state.streak||0)+ ' 🔥'
-    }
-
-    // --- Exercise add handler ---
-    $('#form-ex').addEventListener('submit', e=>{
-      e.preventDefault()
-      const name = $('#ex-name').value.trim(); if(!name) return alert('Name required')
-      const cat = $('#ex-cat').value
-      const reps = $('#ex-reps').value || '10'
-      const sets = $('#ex-sets').value || '3'
-      const ex = {name,cat,reps,sets}
-      state.exercises.push(ex)
-      state.planner.today.push(ex)
-      saveState(); renderExercises(); renderPlanner(); renderStats();
-      $('#ex-name').value='';$('#ex-reps').value='';$('#ex-sets').value=''
-    })
-
-    // --- Quick start workout ---
-    function startQuick(ex){
-      if(!ex) return
-      const w = confirm(`Start ${ex.name} • ${ex.reps} • ${ex.sets} sets ?`)
-      if(!w) return
-      // simulate workout session
-      const reps = parseInt((ex.sets||1))*10
-      state.stepsLog.today += Math.round(reps*0.3)
-      state.weights.push({date:Date.now(),weight:state.profile.weight||0})
-      saveState(); renderStats(); drawCharts()
-      alert('Workout logged ✓')
-    }
-
-    // --- Simple calories estimate ---
-    function estimateCalories(steps){ return Math.round(steps*0.04) }
-
-    // --- Charting (vanilla canvas) ---
-    function drawCharts(){
-      const c1 = document.getElementById('chart-steps'); c1.width = c1.clientWidth; c1.height = 140; const g=c1.getContext('2d');
-      // draw simple last 7 days steps
-      const hist = (state.stepsLog.history || []).slice(-7)
-      const days = 7; const data = []
-      for(let i=0;i<days;i++){ const d=hist[hist.length-days+i]; data.push(d?d.steps: (i===days-1?state.stepsLog.today:0)) }
-      const max = Math.max(...data,100)
-      g.clearRect(0,0,c1.width,c1.height)
-      // grid
-      g.strokeStyle='rgba(255,255,255,0.03)';g.lineWidth=1
-      for(let y=0;y<4;y++){ g.beginPath(); g.moveTo(0,(c1.height/4)*y+10); g.lineTo(c1.width,(c1.height/4)*y+10); g.stroke(); }
-      // polyline
-      g.beginPath(); data.forEach((v,i)=>{ const x = (c1.width/(days-1))*i; const y = c1.height - (v/max)*(c1.height-20) -10; if(i===0) g.moveTo(x,y); else g.lineTo(x,y) });
-      const grad = g.createLinearGradient(0,0,c1.width,0); grad.addColorStop(0,'rgba(0,212,255,0.9)'); grad.addColorStop(1,'rgba(123,97,255,0.9)')
-      g.strokeStyle = grad; g.lineWidth=2; g.stroke()
-
-      // progress chart
-      const c2 = document.getElementById('chart-progress'); c2.width = c2.clientWidth; c2.height = 120; const p=c2.getContext('2d')
-      p.clearRect(0,0,c2.width,c2.height)
-      const wdata = state.weights.slice(-7).map(r=>r.weight||0)
-      if(wdata.length){ const maxw=Math.max(...wdata); const minw=Math.min(...wdata)
-        p.beginPath(); wdata.forEach((v,i)=>{ const x=(c2.width/(wdata.length-1||1))*i; const y=c2.height - ((v-minw)/(Math.max(1,maxw-minw)))*(c2.height-20) -10; if(i===0)p.moveTo(x,y); else p.lineTo(x,y) })
-        p.strokeStyle='rgba(255,255,255,0.8)'; p.lineWidth=2; p.stroke()
-      } else { p.fillStyle='rgba(255,255,255,0.04)'; p.fillRect(0,0,c2.width,c2.height); p.fillStyle='var(--muted)'; p.fillText('No weight history',12,20) }
-    }
-
-    // --- Steps persistence & day rollover ---
-    function rolloverIfNeeded(){
-      const todayKey = new Date().toISOString().slice(0,10)
-      if(state.lastDate !== todayKey){
-        // push yesterday
-        if(state.lastDate){ state.stepsLog.history = state.stepsLog.history || []; state.stepsLog.history.push({date:state.lastDate,steps:state.stepsLog.today||0}) }
-        state.stepsLog.today = 0
-        state.lastDate = todayKey
-        saveState()
+    // render today log
+    function renderToday(){
+      const key = todayKey();
+      const today = logs.filter(l=>l.date===key);
+      todayList.innerHTML = "";
+      if(today.length===0){
+        todayList.innerHTML = `<div class="muted small">No workouts logged today.</div>`;
+      }else{
+        today.forEach(t=>{
+          const d = document.createElement("div");
+          d.className = "exercise";
+          d.innerHTML = `<div>
+            <div class="ex-name">${escape(t.name)}</div>
+            <div class="ex-sub">${t.group} • set ${t.set} • ${t.reps} reps</div>
+            <div class="small muted">${t.time}</div>
+          </div>`;
+          todayList.appendChild(d);
+        });
       }
+      todayCount.textContent = today.length + " items";
+      statWk.textContent = today.length;
     }
-    rolloverIfNeeded()
 
-    // --- Motion-based step detector (simple) ---
-    let accelBuffer = [], lastStepTime=0
-    function handleMotion(e){
-      const a = e.accelerationIncludingGravity || e.acceleration
-      if(!a) return
-      const mag = Math.sqrt((a.x||0)*(a.x||0)+(a.y||0)*(a.y||0)+(a.z||0)*(a.z||0))
-      accelBuffer.push({t:Date.now(),v:mag})
-      if(accelBuffer.length>20) accelBuffer.shift()
-      const avg = accelBuffer.reduce((s,x)=>s+x.v,0)/accelBuffer.length
-      const latest = accelBuffer[accelBuffer.length-1].v
-      if(latest - avg > 1.4 && Date.now()-lastStepTime>350){ // threshold & debounce
-        lastStepTime = Date.now()
-        state.stepsLog.today += 1
-        saveState(); renderStats(); drawCharts()
+    // Add exercise
+    addBtn.addEventListener("click", ()=>{
+      const name = exName.value.trim();
+      const group = exGroup.value;
+      const reps = parseInt(exReps.value) || 10;
+      const sets = parseInt(exSets.value) || 3;
+      if(!name){ alert("Please enter exercise name"); return; }
+      const item = { id: uid(), name, group, reps, sets };
+      exercises.unshift(item);
+      saveExercises();
+      renderList();
+      exName.value=""; exReps.value=10; exSets.value=3;
+    });
+
+    // delegate buttons
+    exList.addEventListener("click", (e)=>{
+      const t = e.target;
+      if(t.matches(".btn-del")){
+        const id = t.dataset.id;
+        exercises = exercises.filter(x=>x.id!==id);
+        saveExercises(); renderList();
+      }else if(t.matches(".btn-edit")){
+        const id = t.dataset.id; const ex = exercises.find(x=>x.id===id);
+        if(!ex) return;
+        // simple inline edit prompt
+        const name = prompt("Edit name:", ex.name);
+        if(name!==null){ ex.name = name.trim()||ex.name; saveExercises(); renderList(); }
+      }else if(t.matches(".btn-do")){
+        const id = t.dataset.id; const ex = exercises.find(x=>x.id===id);
+        if(!ex) return;
+        startExercise(ex);
       }
+    });
+
+    // start exercise
+    function startExercise(ex){
+      active = { id: ex.id, name: ex.name, group: ex.group, reps: ex.reps, sets: ex.sets, setIndex:1, repCount:0 };
+      showModalForActive();
     }
 
-    // request permission for iOS 13+
-    $('#btn-perm').addEventListener('click', async ()=>{
-      if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
-        try{ const p = await DeviceMotionEvent.requestPermission(); if(p==='granted'){ window.addEventListener('devicemotion',handleMotion); alert('Motion enabled') } }
-        catch(err){ alert('Permission error: '+err) }
-      } else {
-        window.addEventListener('devicemotion',handleMotion); alert('Motion listening started (if supported)')
+    function showModalForActive(){
+      if(!active) return;
+      modalName.textContent = active.name;
+      modalSub.textContent = `${active.group} • ${active.sets} sets • ${active.reps} reps`;
+      modalSet.textContent = `Set ${active.setIndex} / ${active.sets}`;
+      repCount.textContent = active.repCount;
+      overlay.style.display = "flex";
+    }
+
+    incRep.addEventListener("click", ()=>{ active.repCount = (active.repCount||0)+1; repCount.textContent=active.repCount });
+    decRep.addEventListener("click", ()=>{ active.repCount = Math.max(0,(active.repCount||0)-1); repCount.textContent=active.repCount });
+
+    finishSet.addEventListener("click", ()=>{
+      // save set as completed
+      const now = new Date();
+      logs.unshift({
+        id: uid(),
+        date: todayKey(),
+        time: now.toLocaleTimeString(),
+        name: active.name,
+        group: active.group,
+        set: active.setIndex,
+        reps: active.repCount
+      });
+      saveLogs(); renderToday();
+      // move to next set or finish
+      if(active.setIndex < active.sets){
+        active.setIndex++;
+        active.repCount = 0;
+        showModalForActive();
+      }else{
+        alert("Workout complete for " + active.name);
+        active = null; overlay.style.display="none";
       }
-    })
+    });
 
-    // manual step button
-    $('#btn-step-manual').addEventListener('click', ()=>{ state.stepsLog.today+=1; saveState(); renderStats(); drawCharts() })
+    skipSet.addEventListener("click", ()=>{
+      if(confirm("Skip this set?")){
+        if(active.setIndex < active.sets){
+          active.setIndex++;
+          active.repCount = 0; showModalForActive();
+        } else { active=null; overlay.style.display="none"; }
+      }
+    });
 
-    // add prebuilt categories
-    if(!state.exercises.length){
-      const defaults = [
-        {name:'Push Ups',cat:'Chest',reps:'12',sets:'3'},
-        {name:'Squats',cat:'Legs',reps:'15',sets:'3'},
-        {name:'Plank',cat:'Abs',reps:'60s',sets:'3'}
-      ]
-      state.exercises = defaults.concat(state.exercises)
-      state.planner.today = state.planner.today.concat(defaults)
-      saveState()
-    }
+    closeModal.addEventListener("click", ()=>{ if(confirm("Stop current exercise?")){ active=null; overlay.style.display="none"; } });
 
-    // start workout button
-    $('#start-workout').addEventListener('click', ()=>{ if(!state.planner.today.length) return alert('No exercises in planner'); startQuick(state.planner.today[0]) })
+    // clear data
+    clearAll.addEventListener("click", ()=>{
+      if(confirm("Clear all saved exercises and logs?")){ exercises=[]; logs=[]; saveExercises(); saveLogs(); renderList(); renderToday(); }
+    });
 
-    // log weight
-    $('#log-weight').addEventListener('click', ()=>{
-      const w = prompt('Enter weight in kg')
-      if(!w) return
-      state.profile.weight = parseFloat(w); state.weights.push({date:Date.now(),weight:parseFloat(w)}); saveState(); renderProfile(); drawCharts();
-    })
-    // water
-    $('#water').addEventListener('click', ()=>{ state.water.today = (state.water.today||0)+250; saveState(); alert('Added 250ml. Total: '+state.water.today+'ml') })
+    // small escape helper
+    window.addEventListener("keydown",(e)=>{ if(e.key==="Escape"){ overlay.style.display="none"; active=null } });
 
-    // profile button -> simple modal prompt flow
-    $('#btn-profile').addEventListener('click', ()=>{
-      const p = state.profile
-      const name = prompt('Name',p.name||'')
-      if(name===null) return
-      p.name = name
-      p.age = prompt('Age',p.age||'')||p.age
-      p.gender = prompt('Gender (M/F/Other)',p.gender||'')||p.gender
-      p.height = prompt('Height in cm',p.height||'')||p.height
-      p.weight = prompt('Weight in kg',p.weight||'')||p.weight
-      p.goal = prompt('Goal (weight loss/muscle gain/maintenance)',p.goal||'')||p.goal
-      // compute BMI
-      if(p.height && p.weight){ const h = parseFloat(p.height)/100; p.bmi = +(parseFloat(p.weight)/(h*h)).toFixed(1) }
-      saveState(); renderProfile(); renderStats(); drawCharts();
-    })
-
-    // save exercise quickly from Add button
-    $('#btn-add').addEventListener('click', ()=>{ document.getElementById('ex-name').focus() })
-
-    // backup action (very simple: export JSON)
-    $('#btn-sync').addEventListener('click', ()=>{
-      const data = JSON.stringify(state, null, 2)
-      const blob = new Blob([data],{type:'application/json'})
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a'); a.href = url; a.download='fittrackr-backup.json'; a.click(); URL.revokeObjectURL(url)
-    })
-
-    // delete and manual functions
-    $('#view-progress').addEventListener('click', ()=>{ alert('Open progress chart below. Use Log Weight to add points.') })
-
-    // ripple binding for dynamic buttons
-    document.addEventListener('click', e=>{
-      if(e.target.classList && e.target.classList.contains('btn')) ripple({currentTarget:e.target, clientX:e.clientX, clientY:e.clientY})
-    })
-
-    // initial render
-    renderExercises(); renderPlanner(); renderProfile(); renderStats(); drawCharts()
-
-    // periodic save + midnight rollover
-    setInterval(()=>{ rolloverIfNeeded(); saveState() }, 60_000)
+    // util
+    function escape(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
   </script>
 </body>
 </html>
